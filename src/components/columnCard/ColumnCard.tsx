@@ -2,20 +2,32 @@ import React from 'react';
 import {StyleSheet, View, Text, ScrollView} from 'react-native';
 import {Colors, IconButton} from 'react-native-paper';
 
-const ColumnCard: React.FC = ({children}) => {
+type ColumnCardProps = {
+  children: React.FC;
+  title: string;
+  cardPressed: boolean;
+};
+
+const ColumnCard: React.FC<ColumnCardProps> = ({
+  children,
+  title,
+  cardPressed,
+}) => {
   return (
     <View style={styles.columnContainer}>
-      <Text style={styles.columnHeader}>Column Header</Text>
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        {children}
-        <IconButton
-          icon="plus"
-          color={Colors.grey500}
-          size={40}
-          onPress={() => console.log('Pressed')}
-          style={styles.menuIcon}
-        />
-      </ScrollView>
+      <Text style={styles.columnHeader}>{title}</Text>
+      <View style={styles.scrollView}>
+        <View style={styles.contentContainer}>
+          {children}
+          <IconButton
+            icon="plus"
+            color={Colors.grey500}
+            size={40}
+            onPress={() => console.log('Pressed')}
+            style={styles.menuIcon}
+          />
+        </View>
+      </View>
     </View>
   );
 };
@@ -39,6 +51,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 0.5,
     borderBottomColor: '#bbbccc',
+    backgroundColor: '#673ab7',
+    color: '#fff',
   },
   menuIcon: {
     marginHorizontal: '5%',
@@ -51,6 +65,9 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingVertical: '2.5%',
+  },
+  scrollView: {
+    position: 'relative',
   },
 });
 

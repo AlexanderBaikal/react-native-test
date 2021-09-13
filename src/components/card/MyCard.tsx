@@ -1,18 +1,81 @@
-import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import React, {useRef, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Pressable,
+  Animated,
+  PanResponder,
+  Alert,
+} from 'react-native';
 import {ICardItem} from '../../interfaces';
 
-const MyCard: React.FC<ICardItem> = ({title, text}) => {
+const MyCard: React.FC<ICardItem> = ({
+  title,
+  text,
+  cardPressed,
+  setCardPressed,
+}) => {
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  const [column, setColumn] = useState(0);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        let panPos = {
+          x: pan.x._value,
+          y: pan.y._value,
+        };
+
+        pan.setOffset(panPos);
+      },
+      onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {
+        listener: event => {
+          if (pan.x._value > 200) {
+            setColumn(1);
+          }
+          if (pan.x._value < -200) {
+            setColumn(-1);
+          }
+        },
+        useNativeDriver: false,
+      }),
+      onPanResponderStart: () => {
+        if (setCardPressed) setCardPressed(true);
+      },
+      onPanResponderEnd: () => {
+        pan.setValue({x: 0, y: 0});
+        if (setCardPressed) setCardPressed(false);
+      },
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+      },
+    }),
+  ).current;
+
   return (
     <View>
-      <TouchableOpacity style={styles.cardContainer}>
+      <Animated.View
+        style={[
+          styles.cardContainer,
+          cardPressed ? styles.cardPressed : {},
+          {
+            transform: [{translateX: pan.x}, {translateY: pan.y}],
+          },
+        ]}
+        {...panResponder.panHandlers}>
         <View style={styles.headerContainer}>
           <Text style={styles.cardHeader}>{title}</Text>
         </View>
         <View style={styles.textContainer}>
           <Text style={styles.cardText}>{text}</Text>
         </View>
-      </TouchableOpacity>
+      </Animated.View>
+      {cardPressed ? <View style={styles.cardPlaceholder}></View> : null}
     </View>
   );
 };
@@ -20,7 +83,7 @@ const MyCard: React.FC<ICardItem> = ({title, text}) => {
 const styles = StyleSheet.create({
   cardContainer: {
     width: '90%',
-    height: 150,
+    height: 130,
     marginHorizontal: '5%',
     marginVertical: '2.5%',
     backgroundColor: '#fff',
@@ -50,6 +113,22 @@ const styles = StyleSheet.create({
   },
   cardText: {
     fontSize: 16,
+  },
+  cardPlaceholder: {
+    width: '90%',
+    height: 130,
+    marginHorizontal: '5%',
+    marginVertical: '2.5%',
+    display: 'flex',
+    flexDirection: 'column',
+    borderRadius: 6,
+  },
+  cardPressed: {
+    position: 'absolute',
+    zIndex: 10,
+    elevation: 12,
+    shadowColor: '#333',
+    overflow: 'visible',
   },
 });
 

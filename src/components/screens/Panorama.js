@@ -14,6 +14,7 @@ import {useNavigation} from '@react-navigation/core';
 import {screens} from '../navigator/naviConsts';
 import ColumnCard from '../columnCard/ColumnCard';
 import MyCard from '../card/MyCard';
+import {CARDS} from '../../cards';
 
 const Panorama = () => {
   const navigation = useNavigation();
@@ -29,6 +30,8 @@ const Panorama = () => {
   const [wholeWidth, setWholeWidth] = useState(1);
 
   const [visibleWidth, setVisibleWidth] = useState(0.2);
+
+  const [cardPressed, setCardPressed] = useState(false);
 
   const scrollRef = useRef(null);
 
@@ -50,10 +53,9 @@ const Panorama = () => {
       onStartShouldSetPanResponder: () => true,
 
       onPanResponderGrant: (e, gestureState) => {
-        // indicator.setOffset(gestureState.moveX);
+        //
       },
       onPanResponderStart: (e, gestureState) => {
-        console.log('START', indicator);
         setScrollPos(indicator);
       },
       onPanResponderMove: (e, gestureState) => {
@@ -83,6 +85,7 @@ const Panorama = () => {
         horizontal
         persistentScrollbar
         pagingEnabled
+        scrollEnabled={!cardPressed}
         showsHorizontalScrollIndicator={false}
         onContentSizeChange={(w, h) => {
           setWholeWidth(w);
@@ -97,34 +100,25 @@ const Panorama = () => {
             useNativeDriver: false,
           },
         )}>
-        <View
-          style={[styles.columnContainer, {width: Math.floor(windowWidth)}]}>
-          <ColumnCard>
-            <MyCard title="First card header" text={'some text'} />
-            <MyCard title="Second card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-          </ColumnCard>
-        </View>
-        <View
-          style={[styles.columnContainer, {width: Math.floor(windowWidth)}]}>
-          <ColumnCard>
-            <MyCard title="First card header" text={'some text'} />
-            <MyCard title="Second card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-          </ColumnCard>
-        </View>
-        <View
-          style={[styles.columnContainer, {width: Math.floor(windowWidth)}]}>
-          <ColumnCard>
-            <MyCard title="First card header" text={'some text'} />
-            <MyCard title="Second card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-          </ColumnCard>
-        </View>
+        {CARDS.map(column => (
+          <View
+            key={column.title}
+            style={[
+              styles.columnContainer,
+              {width: Math.floor(windowWidth), zIndex: cardPressed ? 10 : 1},
+            ]}>
+            <ColumnCard cardPressed={cardPressed} title={column.title}>
+              {column.cards.map(card => (
+                <MyCard
+                  title={card.title}
+                  text={card.text}
+                  cardPressed={cardPressed}
+                  setCardPressed={setCardPressed}
+                />
+              ))}
+            </ColumnCard>
+          </View>
+        ))}
       </ScrollView>
 
       <View style={styles.indicatorWrapper}>
@@ -161,6 +155,7 @@ const styles = StyleSheet.create({
   columnContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   indicator: {
     backgroundColor: '#bbbccc',

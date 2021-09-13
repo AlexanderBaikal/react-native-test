@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/core';
-import React from 'react';
+import React, {useState} from 'react';
 
 import {View, Text, ScrollView, StyleSheet} from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
@@ -25,6 +25,9 @@ const HomeScreen = () => {
     navigation.navigate(screens.PANORAMA);
   };
 
+  const [addForm, setAddForm] = useState(false);
+  const [cardList, setCardList] = useState(false);
+
   return (
     <ScrollView>
       <TouchableOpacity onPress={handleNavigate}>
@@ -35,43 +38,44 @@ const HomeScreen = () => {
         icon="menu"
         color={Colors.grey500}
         size={40}
-        onPress={() => console.log('Pressed')}
+        onPress={() => setCardList(prev => !prev)}
         style={styles.menuIcon}
       />
 
-      <View>
-        <Card style={styles.cardItem}>
-          <TouchableRipple
-            onPress={() => console.log('Pressed')}
-            rippleColor="rgba(0, 0, 0, .32)">
-            <Card.Title title="Column one" />
-          </TouchableRipple>
-        </Card>
-        <Card style={styles.cardItem}>
-          <Card.Title title="Column two" />
-        </Card>
-        <Card style={styles.cardItem}>
-          <Card.Title title="Column three" />
-        </Card>
-      </View>
-
-      <View style={styles.addColumn}>
-        <TextInput label="Column name" mode="outlined" />
-        <Button
-          mode="contained"
-          onPress={() => console.log('Pressed')}
-          style={styles.completeButton}>
-          Ok
-        </Button>
-      </View>
-
-      <IconButton
-        icon="plus"
-        color={Colors.grey500}
-        size={40}
-        onPress={() => console.log('Pressed')}
-        style={styles.menuIcon}
-      />
+      {addForm ? (
+        <View style={styles.addColumn}>
+          <TextInput label="Column name" mode="outlined" />
+          <Button
+            mode="contained"
+            onPress={() => setAddForm(false)}
+            style={styles.completeButton}>
+            Ok
+          </Button>
+        </View>
+      ) : (
+        <View>
+          <Card style={styles.cardItem}>
+            <TouchableRipple
+              onPress={() => console.log('Pressed')}
+              rippleColor="rgba(0, 0, 0, .12)">
+              <Card.Title title="Column one" />
+            </TouchableRipple>
+          </Card>
+          <Card style={styles.cardItem}>
+            <Card.Title title="Column two" />
+          </Card>
+          <Card style={styles.cardItem}>
+            <Card.Title title="Column three" />
+          </Card>
+          <IconButton
+            icon="plus"
+            color={Colors.grey500}
+            size={40}
+            onPress={() => setAddForm(true)}
+            style={styles.menuIcon}
+          />
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -86,8 +90,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
+
   cardItem: {
-    marginBottom: 8,
+    marginVertical: 4,
     width: '90%',
     left: '5%',
   },
