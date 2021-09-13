@@ -5,8 +5,9 @@ import {
   Text,
   ScrollView,
   StyleSheet,
+  Dimensions,
   Animated,
-  Alert,
+  PanResponder,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/core';
@@ -21,106 +22,154 @@ const Panorama = () => {
     navigation.navigate(screens.HOME_SCREEN);
   };
 
-  const [scrollValue, setScrollValue] = useState(0);
+  const windowWidth = Dimensions.get('window').width;
 
-  // const [scrollState, setScrollState] = useState({
-  //   indicator: new Animated.Value(0),
-  //   wholeHeight: 1,
-  //   visibleHeight: 0,
-  // });
+  const [indicator, setIndicator] = useState(new Animated.Value(0));
 
-  // const indicatorSize =
-  //   scrollState.wholeHeight > scrollState.visibleHeight
-  //     ? (scrollState.visibleHeight * scrollState.visibleHeight) /
-  //       scrollState.wholeHeight
-  //     : scrollState.visibleHeight;
+  const [wholeWidth, setWholeWidth] = useState(1);
 
-  // const difference =
-  //   this.state.visibleHeight > indicatorSize
-  //     ? this.state.visibleHeight - indicatorSize
-  //     : 1;
+  const [visibleWidth, setVisibleWidth] = useState(0.2);
+
+  const scrollRef = useRef(null);
+
+  const indicatorSize =
+    wholeWidth > visibleWidth
+      ? (visibleWidth * visibleWidth) / wholeWidth
+      : visibleWidth;
+
+  const difference =
+    visibleWidth > indicatorSize ? visibleWidth - indicatorSize : 1;
+
+  // Pan responder
+
+  const [scrollPos, setScrollPos] = useState(indicator);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => true,
+
+      onPanResponderGrant: (e, gestureState) => {
+        // indicator.setOffset(gestureState.moveX);
+      },
+      onPanResponderStart: (e, gestureState) => {
+        console.log('START', indicator);
+        setScrollPos(indicator);
+      },
+      onPanResponderMove: (e, gestureState) => {
+        let shift = scrollPos._value + gestureState.dx * 0.2;
+
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            x: shift,
+            animated: false,
+          });
+        }
+      },
+
+      onPanResponderRelease: () => {
+        indicator.flattenOffset();
+      },
+    }),
+  ).current;
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={goBack}>
         <Text>Go back</Text>
       </TouchableOpacity>
-      <View style={[styles.columnContainer, {left: -scrollValue}]}>
-        <View style={styles.columnWrapper}>
-          <ColumnCard>
-            <MyCard title="First card header" text={'some text'} />
-            <MyCard title="Second card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-          </ColumnCard>
-        </View>
-        <View style={styles.columnWrapper}>
-          <ColumnCard>
-            <MyCard title="First card header" text={'some text'} />
-            <MyCard title="Second card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-          </ColumnCard>
-        </View>
-        <View style={styles.columnWrapper}>
-          <ColumnCard>
-            <MyCard title="First card header" text={'some text'} />
-            <MyCard title="Second card header" text={'some text'} />
-            <MyCard title="Third card header" text={'some text'} />
-          </ColumnCard>
-        </View>
-      </View>
-      <View
-        onStartShouldSetResponder={() => true}
-        onMoveShouldSetResponder={evt => true}
-        onResponderMove={evt => {
-          setScrollValue(evt.nativeEvent.pageX);
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        persistentScrollbar
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onContentSizeChange={(w, h) => {
+          setWholeWidth(w);
         }}
-        style={[styles.scrollBar, {left: scrollValue}]}
-      />
-
-      {/* <Animated.View
-        style={[
-          styles.scrollBar,
+        onLayout={evt => {
+          setVisibleWidth(evt.nativeEvent.layout.width);
+        }}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {x: indicator}}}],
           {
-            transform: [
-              {
-                translateY: Animated.multiply(
-                  this.state.indicator,
-                  this.state.visibleHeight / this.state.wholeHeight,
-                ).interpolate({
-                  inputRange: [0, difference],
-                  outputRange: [0, difference],
-                  extrapolate: 'clamp',
-                }),
-              },
-            ],
+            listener: event => {},
+            useNativeDriver: false,
           },
-        ]}
-      /> */}
+        )}>
+        <View
+          style={[styles.columnContainer, {width: Math.floor(windowWidth)}]}>
+          <ColumnCard>
+            <MyCard title="First card header" text={'some text'} />
+            <MyCard title="Second card header" text={'some text'} />
+            <MyCard title="Third card header" text={'some text'} />
+            <MyCard title="Third card header" text={'some text'} />
+            <MyCard title="Third card header" text={'some text'} />
+          </ColumnCard>
+        </View>
+        <View
+          style={[styles.columnContainer, {width: Math.floor(windowWidth)}]}>
+          <ColumnCard>
+            <MyCard title="First card header" text={'some text'} />
+            <MyCard title="Second card header" text={'some text'} />
+            <MyCard title="Third card header" text={'some text'} />
+          </ColumnCard>
+        </View>
+        <View
+          style={[styles.columnContainer, {width: Math.floor(windowWidth)}]}>
+          <ColumnCard>
+            <MyCard title="First card header" text={'some text'} />
+            <MyCard title="Second card header" text={'some text'} />
+            <MyCard title="Third card header" text={'some text'} />
+            <MyCard title="Third card header" text={'some text'} />
+            <MyCard title="Third card header" text={'some text'} />
+          </ColumnCard>
+        </View>
+      </ScrollView>
+
+      <View style={styles.indicatorWrapper}>
+        <Animated.View
+          style={[
+            styles.indicator,
+            {
+              width: indicatorSize,
+              transform: [
+                {
+                  translateX: Animated.multiply(
+                    indicator,
+                    visibleWidth / wholeWidth,
+                  ).interpolate({
+                    inputRange: [0, difference],
+                    outputRange: [0, difference],
+                    extrapolate: 'clamp',
+                  }),
+                },
+              ],
+            },
+          ]}
+          {...panResponder.panHandlers}
+        />
+      </View>
     </View>
   );
 };
 const styles = StyleSheet.create({
-  mt5: {
-    marginTop: 12,
-  },
   container: {
     flex: 1,
     width: '100%',
   },
   columnContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginTop: '5%',
-    height: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  columnWrapper: {
-    width: '100%',
-  },
-  scrollBar: {
-    height: 16,
-    width: '20%',
+  indicator: {
     backgroundColor: '#bbbccc',
+    height: 16,
   },
+  indicatorWrapper: {
+    height: 16,
+  },
+  contentContainer: {},
 });
 
 export default Panorama;

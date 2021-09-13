@@ -6,7 +6,7 @@ const ColumnCard: React.FC = ({children}) => {
   return (
     <View style={styles.columnContainer}>
       <Text style={styles.columnHeader}>Column Header</Text>
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
         {children}
         <IconButton
           icon="plus"
@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#eeefff',
     height: '95%',
     width: '90%',
-    marginHorizontal: '5%',
     borderRadius: 6,
     elevation: 3,
     shadowOffset: {width: 1, height: 1},
@@ -49,6 +48,9 @@ const styles = StyleSheet.create({
     shadowColor: '#333',
     shadowOpacity: 0.3,
     shadowRadius: 4,
+  },
+  contentContainer: {
+    paddingVertical: '2.5%',
   },
 });
 
