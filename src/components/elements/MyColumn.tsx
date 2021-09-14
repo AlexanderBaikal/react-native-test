@@ -1,18 +1,20 @@
+import {useNavigation} from '@react-navigation/core';
 import React, {useContext, useState} from 'react';
-import {StyleSheet, View, Text, ScrollView} from 'react-native';
-import {Colors, IconButton} from 'react-native-paper';
+import {StyleSheet, View, Text} from 'react-native';
 import Context from '../../Context';
-import {ICardItem, IColumnItem} from '../../interfaces';
+import {IColumnItem} from '../../interfaces';
+import {homeScreenValues, screens} from '../../consts/consts';
 import MyCard from './MyCard';
+import BottomButtons from './BottomButtons';
 
-const ColumnCard: React.FC<IColumnItem> = ({items, title, columnId}) => {
-  const {dropColumn, windowWidth} = useContext(Context);
+const MyColumn: React.FC<IColumnItem> = ({items, title, columnId}) => {
+  const {dropColumn, setSelectedCol, setScreenValue} = useContext(Context);
+
+  const navigation = useNavigation();
 
   const [startItem, setStartItem] = useState(0);
 
   let slicedItems = items.slice(startItem, startItem + 3);
-
-  console.log(items.length);
 
   const onUpPress = () => {
     if (startItem > 0) setStartItem(startItem - 1);
@@ -20,6 +22,13 @@ const ColumnCard: React.FC<IColumnItem> = ({items, title, columnId}) => {
 
   const onDownPress = () => {
     if (startItem + 1 < items.length) setStartItem(startItem + 1);
+  };
+
+  const onAddPress = () => {
+    // @ts-ignore
+    navigation.navigate(screens.HOME_SCREEN);
+    setScreenValue(homeScreenValues.CARD);
+    setSelectedCol(columnId);
   };
 
   return (
@@ -45,31 +54,11 @@ const ColumnCard: React.FC<IColumnItem> = ({items, title, columnId}) => {
             </View>
           </View>
         </View>
-        <View style={styles.bottomButtons}>
-          <IconButton
-            icon="plus"
-            color={Colors.grey500}
-            size={40}
-            onPress={() => console.log('Add')}
-            style={styles.menuIcon}
-          />
-          <View style={styles.naviButtons}>
-            <IconButton
-              icon="arrow-up"
-              color={Colors.grey500}
-              size={40}
-              onPress={onUpPress}
-              style={styles.menuIcon}
-            />
-            <IconButton
-              icon="arrow-down"
-              color={Colors.grey500}
-              size={40}
-              onPress={onDownPress}
-              style={styles.menuIcon}
-            />
-          </View>
-        </View>
+        <BottomButtons
+          onUpPress={onUpPress}
+          onDownPress={onDownPress}
+          onAddPress={onAddPress}
+        />
       </View>
     </>
   );
@@ -96,35 +85,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#673ab7',
     color: '#fff',
   },
-  menuIcon: {
-    marginHorizontal: '5%',
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    elevation: 6,
-    shadowColor: '#333',
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
+
   contentContainer: {
     paddingVertical: '2.5%',
   },
   scrollView: {
     position: 'relative',
   },
-  bottomButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    zIndex: 10,
-    position: 'absolute',
-    bottom: 12,
-  },
-  naviButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingRight: '2.5%',
-  },
   cards: {},
 });
 
-export default ColumnCard;
+export default MyColumn;

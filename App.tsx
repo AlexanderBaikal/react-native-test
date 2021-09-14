@@ -1,8 +1,9 @@
 import {NavigationContainer} from '@react-navigation/native';
 import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {CARDS} from './src/cards';
 import Navigator from './src/components/navigator/Navigator';
+import {homeScreenValues} from './src/consts/consts';
 import Context from './src/Context';
 
 const App = () => {
@@ -19,6 +20,8 @@ const App = () => {
   }
 
   const moveCard = (startCol: number, startCard: number, destCol: number) => {
+    console.log(startCol, startCard, destCol);
+
     if (!cardItems[destCol]) return;
     let result;
     let card = cardItems[startCol].cards[startCard];
@@ -38,8 +41,47 @@ const App = () => {
     setCardItems(result.sort(compare));
   };
 
+  const changeText = (col: number, card: number, value: string) => {
+    let newCardItems = JSON.parse(JSON.stringify(cardItems));
+    newCardItems[col].cards[card].text = value;
+    setCardItems(newCardItems);
+  };
+
+  const addColumn = (name: string) => {
+    let newCol = {
+      title: name,
+      cards: [],
+    };
+    setCardItems([...cardItems, newCol]);
+  };
+
+  const addCard = (colName: number, cardName: string, textValue: string) => {
+    let newCard = {
+      title: cardName,
+      text: textValue,
+    };
+
+    let newCardItems = JSON.parse(JSON.stringify(cardItems));
+    newCardItems[colName].cards.push(newCard);
+    setCardItems(newCardItems);
+  };
+
+  const [screenValue, setScreenValue] = useState(homeScreenValues.NOTHING);
+  const [selectedCol, setSelectedCol] = useState(-1);
+
   return (
-    <Context.Provider value={{cardItems, moveCard}}>
+    <Context.Provider
+      value={{
+        cardItems,
+        moveCard,
+        changeText,
+        addColumn,
+        addCard,
+        screenValue,
+        setScreenValue,
+        selectedCol,
+        setSelectedCol,
+      }}>
       <NavigationContainer>
         <Navigator />
       </NavigationContainer>

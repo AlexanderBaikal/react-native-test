@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/core';
-import {screens} from '../navigator/naviConsts';
+import {screens} from '../../consts/consts';
 import ColumnCard from '../columnCard/ColumnCard';
 import MyCard from '../card/MyCard';
 

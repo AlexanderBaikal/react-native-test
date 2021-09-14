@@ -2,28 +2,18 @@ import React, {useContext, useRef, useState} from 'react';
 
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   Dimensions,
   Animated,
   PanResponder,
 } from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import {useNavigation} from '@react-navigation/core';
-import {screens} from '../navigator/naviConsts';
-import ColumnCard from '../elements/ColumnCard';
+import MyColumn from '../elements/MyColumn';
 import Context from '../../Context';
+import {IColumn} from '../../interfaces';
 
 const Panorama = () => {
-  const navigation = useNavigation();
-
-  const goBack = () => {
-    navigation.navigate(screens.HOME_SCREEN);
-  };
-
   const windowWidth = Dimensions.get('window').width;
-
   const [indicator, _] = useState(new Animated.Value(0));
   const [wholeWidth, setWholeWidth] = useState(1);
   const [visibleWidth, setVisibleWidth] = useState(0.2);
@@ -31,7 +21,15 @@ const Panorama = () => {
   const [activeColumn, setActiveColumn] = useState(-1);
   const [dropColumn, setDropColumn] = useState(-1);
 
-  const {cardItems, moveCard} = useContext(Context);
+  const {
+    cardItems,
+    moveCard,
+    changeText,
+    setScreenValue,
+    addCard,
+    setSelectedCol,
+    selectedCol,
+  } = useContext(Context);
 
   const scrollRef = useRef(null);
 
@@ -59,9 +57,11 @@ const Panorama = () => {
         setScrollPos(indicator);
       },
       onPanResponderMove: (e, gestureState) => {
+        // @ts-ignore
         let shift = scrollPos._value + gestureState.dx * 0.2;
 
         if (scrollRef.current) {
+          // @ts-ignore
           scrollRef.current.scrollTo({
             x: shift,
             animated: false,
@@ -80,18 +80,20 @@ const Panorama = () => {
     activeCard,
     dropColumn,
     moveCard,
+    changeText,
     setActiveCard,
     setActiveColumn,
     setDropColumn,
+    setScreenValue,
+    addCard,
+    setSelectedCol,
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={goBack}>
-        <Text>Go back</Text>
-      </TouchableOpacity>
       <ScrollView
         ref={scrollRef}
+        contentOffset={{x: windowWidth * selectedCol, y: 0}}
         horizontal
         persistentScrollbar
         pagingEnabled
@@ -110,7 +112,7 @@ const Panorama = () => {
             useNativeDriver: false,
           },
         )}>
-        {cardItems.map((column, columnId) => (
+        {cardItems.map((column: IColumn, columnId: number) => (
           <View
             key={column.title}
             style={[
@@ -121,11 +123,9 @@ const Panorama = () => {
               },
             ]}>
             <Context.Provider value={contextColumn}>
-              <ColumnCard
+              <MyColumn
                 items={column.cards}
-                activeCard={activeCard}
                 title={column.title}
-                dropColumn={dropColumn}
                 columnId={columnId}
               />
             </Context.Provider>

@@ -1,7 +1,7 @@
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import Panorama from '../screens/Panorama';
-import {screens} from './naviConsts';
+import {screens} from '../../consts/consts';
 import HomeScreen from './../screens/HomeScreen';
 import {IconButton, Colors} from 'react-native-paper';
 

@@ -1,5 +1,13 @@
 import React, {useContext, useRef, useState} from 'react';
-import {View, Text, StyleSheet, Animated, PanResponder} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  PanResponder,
+  TextInput,
+  Alert,
+} from 'react-native';
 import Context from '../../Context';
 import {ICardItem} from '../../interfaces';
 
@@ -12,11 +20,10 @@ const MyCard: React.FC<ICardItem> = ({cardId, title, text, columnId}) => {
     setDropColumn,
     windowWidth,
     moveCard,
+    changeText,
   } = useContext(Context);
 
   const onDropCard = () => {
-    console.log(columnId, cardId, dropColumnRef.current);
-
     setDropColumn(dropColumnRef.current);
     if (dropColumnRef.current !== -1 && columnId !== dropColumnRef.current)
       moveCard(columnId, cardId, dropColumnRef.current);
@@ -32,7 +39,8 @@ const MyCard: React.FC<ICardItem> = ({cardId, title, text, columnId}) => {
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
         let panPos = {
-          x: pan.x._value,
+          // @ts-ignore
+          x: pan.x._value, // @ts-ignore
           y: pan.y._value,
         };
 
@@ -41,8 +49,10 @@ const MyCard: React.FC<ICardItem> = ({cardId, title, text, columnId}) => {
       onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {
         listener: event => {
           let dropValue;
+          // @ts-ignore
           if (pan.x._value > windowWidth / 2) {
             dropValue = columnId + 1;
+            // @ts-ignore
           } else if (pan.x._value < -windowWidth / 2) {
             dropValue = columnId - 1;
           } else {
@@ -73,6 +83,12 @@ const MyCard: React.FC<ICardItem> = ({cardId, title, text, columnId}) => {
     }),
   ).current;
 
+  const [textValue, setTextValue] = useState(text);
+
+  const onBlur = () => {
+    changeText(columnId, cardId, textValue);
+  };
+
   return (
     <View>
       <Animated.View
@@ -88,7 +104,14 @@ const MyCard: React.FC<ICardItem> = ({cardId, title, text, columnId}) => {
           <Text style={styles.cardHeader}>{title}</Text>
         </View>
         <View style={styles.textContainer}>
-          <Text style={styles.cardText}>{text}</Text>
+          <TextInput
+            style={styles.cardText}
+            onChangeText={setTextValue}
+            value={textValue}
+            multiline
+            numberOfLines={4}
+            onBlur={onBlur}
+          />
         </View>
       </Animated.View>
       {activeCard === cardId ? (
@@ -131,6 +154,7 @@ const styles = StyleSheet.create({
   },
   cardText: {
     fontSize: 16,
+    paddingVertical: 0,
   },
   cardPlaceholder: {
     width: '90%',
