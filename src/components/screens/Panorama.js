@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 
 import {
   View,
@@ -12,9 +12,8 @@ import {
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/core';
 import {screens} from '../navigator/naviConsts';
-import ColumnCard from '../columnCard/ColumnCard';
-import MyCard from '../card/MyCard';
-import {CARDS} from '../../cards';
+import ColumnCard from '../elements/ColumnCard';
+import Context from '../../Context';
 
 const Panorama = () => {
   const navigation = useNavigation();
@@ -25,13 +24,14 @@ const Panorama = () => {
 
   const windowWidth = Dimensions.get('window').width;
 
-  const [indicator, setIndicator] = useState(new Animated.Value(0));
-
+  const [indicator, _] = useState(new Animated.Value(0));
   const [wholeWidth, setWholeWidth] = useState(1);
-
   const [visibleWidth, setVisibleWidth] = useState(0.2);
+  const [activeCard, setActiveCard] = useState(-1);
+  const [activeColumn, setActiveColumn] = useState(-1);
+  const [dropColumn, setDropColumn] = useState(-1);
 
-  const [cardPressed, setCardPressed] = useState(false);
+  const {cardItems, moveCard} = useContext(Context);
 
   const scrollRef = useRef(null);
 
@@ -75,6 +75,16 @@ const Panorama = () => {
     }),
   ).current;
 
+  const contextColumn = {
+    windowWidth,
+    activeCard,
+    dropColumn,
+    moveCard,
+    setActiveCard,
+    setActiveColumn,
+    setDropColumn,
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={goBack}>
@@ -85,7 +95,7 @@ const Panorama = () => {
         horizontal
         persistentScrollbar
         pagingEnabled
-        scrollEnabled={!cardPressed}
+        scrollEnabled={activeCard === -1}
         showsHorizontalScrollIndicator={false}
         onContentSizeChange={(w, h) => {
           setWholeWidth(w);
@@ -100,23 +110,25 @@ const Panorama = () => {
             useNativeDriver: false,
           },
         )}>
-        {CARDS.map(column => (
+        {cardItems.map((column, columnId) => (
           <View
             key={column.title}
             style={[
               styles.columnContainer,
-              {width: Math.floor(windowWidth), zIndex: cardPressed ? 10 : 1},
+              {
+                width: windowWidth,
+                zIndex: activeColumn === columnId ? 10 : 1,
+              },
             ]}>
-            <ColumnCard cardPressed={cardPressed} title={column.title}>
-              {column.cards.map(card => (
-                <MyCard
-                  title={card.title}
-                  text={card.text}
-                  cardPressed={cardPressed}
-                  setCardPressed={setCardPressed}
-                />
-              ))}
-            </ColumnCard>
+            <Context.Provider value={contextColumn}>
+              <ColumnCard
+                items={column.cards}
+                activeCard={activeCard}
+                title={column.title}
+                dropColumn={dropColumn}
+                columnId={columnId}
+              />
+            </Context.Provider>
           </View>
         ))}
       </ScrollView>

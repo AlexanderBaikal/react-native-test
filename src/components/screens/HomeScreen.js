@@ -1,25 +1,23 @@
 import {useNavigation} from '@react-navigation/core';
-import React, {useState} from 'react';
-
+import React, {useContext, useState} from 'react';
 import {View, Text, ScrollView, StyleSheet} from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {screens} from '../navigator/naviConsts';
-import MyCard from '../card/MyCard';
-import ColumnCard from './../columnCard/ColumnCard';
-import HamburgerIcon from '../assets/icons/HamburgerIcon';
+
 import {
   IconButton,
   Colors,
-  Appbar,
   Card,
-  Surface,
   TouchableRipple,
   TextInput,
   Button,
 } from 'react-native-paper';
+import Context from '../../Context';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+
+  const {cardItems} = useContext(Context);
 
   const handleNavigate = () => {
     navigation.navigate(screens.PANORAMA);
@@ -54,19 +52,16 @@ const HomeScreen = () => {
         </View>
       ) : (
         <View>
-          <Card style={styles.cardItem}>
-            <TouchableRipple
-              onPress={() => console.log('Pressed')}
-              rippleColor="rgba(0, 0, 0, .12)">
-              <Card.Title title="Column one" />
-            </TouchableRipple>
-          </Card>
-          <Card style={styles.cardItem}>
-            <Card.Title title="Column two" />
-          </Card>
-          <Card style={styles.cardItem}>
-            <Card.Title title="Column three" />
-          </Card>
+          {cardItems.map(column => (
+            <Card key={column.title} style={styles.cardItem}>
+              <TouchableRipple
+                onPress={() => console.log('Pressed')}
+                rippleColor="rgba(0, 0, 0, .12)">
+                <Card.Title title={column.title} />
+              </TouchableRipple>
+            </Card>
+          ))}
+
           <IconButton
             icon="plus"
             color={Colors.grey500}
@@ -90,7 +85,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
-
   cardItem: {
     marginVertical: 4,
     width: '90%',

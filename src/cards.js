@@ -31,6 +31,10 @@ export const CARDS = [
         title: 'Card three of column two',
         text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Molestias, asperiores magni amet libero laborum repudiandae provident itaque earum nobis est?',
       },
+      {
+        title: 'Card four of column two',
+        text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Molestias, asperiores magni amet libero laborum repudiandae provident itaque earum nobis est?',
+      },
     ],
   },
   {

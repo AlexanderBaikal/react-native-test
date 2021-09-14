@@ -1,25 +1,30 @@
-import React, {useRef, useState} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Pressable,
-  Animated,
-  PanResponder,
-  Alert,
-} from 'react-native';
+import React, {useContext, useRef, useState} from 'react';
+import {View, Text, StyleSheet, Animated, PanResponder} from 'react-native';
+import Context from '../../Context';
 import {ICardItem} from '../../interfaces';
 
-const MyCard: React.FC<ICardItem> = ({
-  title,
-  text,
-  cardPressed,
-  setCardPressed,
-}) => {
-  const pan = useRef(new Animated.ValueXY()).current;
+const MyCard: React.FC<ICardItem> = ({cardId, title, text, columnId}) => {
+  const {
+    activeCard,
+    dropColumn,
+    setActiveCard,
+    setActiveColumn,
+    setDropColumn,
+    windowWidth,
+    moveCard,
+  } = useContext(Context);
 
-  const [column, setColumn] = useState(0);
+  const onDropCard = () => {
+    console.log(columnId, cardId, dropColumnRef.current);
+
+    setDropColumn(dropColumnRef.current);
+    if (dropColumnRef.current !== -1 && columnId !== dropColumnRef.current)
+      moveCard(columnId, cardId, dropColumnRef.current);
+  };
+
+  const dropColumnRef = useRef(dropColumn);
+
+  const pan = useRef(new Animated.ValueXY()).current;
 
   const panResponder = useRef(
     PanResponder.create({
@@ -35,21 +40,32 @@ const MyCard: React.FC<ICardItem> = ({
       },
       onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {
         listener: event => {
-          if (pan.x._value > 200) {
-            setColumn(1);
+          let dropValue;
+          if (pan.x._value > windowWidth / 2) {
+            dropValue = columnId + 1;
+          } else if (pan.x._value < -windowWidth / 2) {
+            dropValue = columnId - 1;
+          } else {
+            dropValue = -1;
           }
-          if (pan.x._value < -200) {
-            setColumn(-1);
+
+          if (dropColumnRef.current !== dropValue) {
+            dropColumnRef.current = dropValue;
           }
         },
         useNativeDriver: false,
       }),
       onPanResponderStart: () => {
-        if (setCardPressed) setCardPressed(true);
+        setActiveCard(cardId);
+        setActiveColumn(columnId);
+        setDropColumn(-1); // ?
       },
       onPanResponderEnd: () => {
+        onDropCard();
         pan.setValue({x: 0, y: 0});
-        if (setCardPressed) setCardPressed(false);
+        setActiveCard(-1);
+        setActiveColumn(-1);
+        setDropColumn(-1); // ?
       },
       onPanResponderRelease: () => {
         pan.flattenOffset();
@@ -62,7 +78,7 @@ const MyCard: React.FC<ICardItem> = ({
       <Animated.View
         style={[
           styles.cardContainer,
-          cardPressed ? styles.cardPressed : {},
+          activeCard === cardId ? styles.cardPressed : {},
           {
             transform: [{translateX: pan.x}, {translateY: pan.y}],
           },
@@ -75,7 +91,9 @@ const MyCard: React.FC<ICardItem> = ({
           <Text style={styles.cardText}>{text}</Text>
         </View>
       </Animated.View>
-      {cardPressed ? <View style={styles.cardPlaceholder}></View> : null}
+      {activeCard === cardId ? (
+        <View style={styles.cardPlaceholder}></View>
+      ) : null}
     </View>
   );
 };
@@ -128,7 +146,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
     elevation: 12,
     shadowColor: '#333',
-    overflow: 'visible',
   },
 });
 
