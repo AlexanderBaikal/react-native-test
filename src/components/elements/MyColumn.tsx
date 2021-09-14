@@ -6,6 +6,8 @@ import {IColumnItem} from '../../interfaces';
 import {homeScreenValues, screens} from '../../consts/consts';
 import MyCard from './MyCard';
 import BottomButtons from './BottomButtons';
+import {IconButton} from 'react-native-paper';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 const MyColumn: React.FC<IColumnItem> = ({items, title, columnId}) => {
   const {dropColumn, setSelectedCol, setScreenValue} = useContext(Context);
@@ -18,6 +20,11 @@ const MyColumn: React.FC<IColumnItem> = ({items, title, columnId}) => {
 
   const onUpPress = () => {
     if (startItem > 0) setStartItem(startItem - 1);
+  };
+
+  const goBack = () => {
+    // @ts-ignore
+    navigation.navigate(screens.HOME_SCREEN);
   };
 
   const onDownPress = () => {
@@ -38,7 +45,16 @@ const MyColumn: React.FC<IColumnItem> = ({items, title, columnId}) => {
           styles.columnContainer,
           {backgroundColor: dropColumn === columnId ? '#dddeee' : '#eeefff'},
         ]}>
-        <Text style={styles.columnHeader}>{title}</Text>
+        <View style={styles.columnHeader}>
+          <Text style={styles.columnHeaderText}>{title}</Text>
+          <IconButton
+            icon="menu"
+            color={Colors.white}
+            size={20}
+            style={styles.menuIcon}
+            onPress={goBack}
+          />
+        </View>
         <View style={styles.scrollView}>
           <View style={styles.contentContainer}>
             <View style={styles.cards}>
@@ -66,7 +82,7 @@ const MyColumn: React.FC<IColumnItem> = ({items, title, columnId}) => {
 
 const styles = StyleSheet.create({
   columnContainer: {
-    height: '95%',
+    height: '93%',
     width: '90%',
     borderRadius: 6,
     elevation: 3,
@@ -76,14 +92,23 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   columnHeader: {
-    fontWeight: '700',
-    fontSize: 18,
     paddingHorizontal: '5%',
     paddingVertical: 12,
     borderBottomWidth: 0.5,
     borderBottomColor: '#bbbccc',
     backgroundColor: '#673ab7',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  columnHeaderText: {
     color: '#fff',
+    fontWeight: '700',
+    fontSize: 18,
+  },
+  menuIcon: {
+    margin: 0,
+    maxHeight: 25,
+    maxWidth: 25,
   },
 
   contentContainer: {

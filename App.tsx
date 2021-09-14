@@ -1,5 +1,5 @@
 import {NavigationContainer} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {CARDS} from './src/cards';
 import Navigator from './src/components/navigator/Navigator';
@@ -19,26 +19,26 @@ const App = () => {
     return 0;
   }
 
+  const cardsItemsRef = useRef(cardItems);
+
   const moveCard = (startCol: number, startCard: number, destCol: number) => {
-    console.log(startCol, startCard, destCol);
-
-    if (!cardItems[destCol]) return;
-    let result;
-    let card = cardItems[startCol].cards[startCard];
-    let updatedStartCol = {
-      ...cardItems[startCol],
-      cards: cardItems[startCol].cards.filter((_, id) => id !== startCard),
-    };
-    let updatedDestCol = {
-      ...cardItems[destCol],
-      cards: [...cardItems[destCol].cards, card],
-    };
-    let anotherCols = cardItems.filter(
-      (_, id) => id !== startCol && id !== destCol,
+    if (
+      !cardsItemsRef.current[destCol] ||
+      !cardsItemsRef.current[startCol].cards[startCard]
+    )
+      return;
+    console.log(
+      JSON.stringify(cardsItemsRef.current[startCol].cards[startCard]),
     );
-    result = [updatedStartCol, ...anotherCols, updatedDestCol];
 
-    setCardItems(result.sort(compare));
+    let card = JSON.parse(
+      JSON.stringify(cardsItemsRef.current[startCol].cards[startCard]),
+    );
+    let newCardItems = JSON.parse(JSON.stringify(cardsItemsRef.current));
+    newCardItems[startCol].cards.splice(startCard, 1);
+    newCardItems[destCol].cards.push(card);
+    setCardItems(newCardItems.sort(compare));
+    cardsItemsRef.current = newCardItems.sort(compare);
   };
 
   const changeText = (col: number, card: number, value: string) => {
