@@ -84,7 +84,15 @@ const MyCard: React.FC<ICardItem> = ({
         </View>
         <View style={styles.textContainer}>
           <TextInput
-            style={styles.cardText}
+            editable={!selected}
+            style={[
+              styles.cardText,
+              {
+                backgroundColor: textInputRef?.current?.isFocused()
+                  ? '#eeeeee'
+                  : 'transparent',
+              },
+            ]}
             onChangeText={setTextValue}
             value={textValue}
             ref={textInputRef}
@@ -136,7 +144,7 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 16,
     paddingVertical: 12,
-    backgroundColor: '#eeeeee',
+
     borderRadius: 6,
   },
   cardPlaceholder: {

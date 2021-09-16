@@ -1,5 +1,12 @@
 import React, {Dispatch, useContext, useState} from 'react';
-import {View, Text, StyleSheet, TextInput, Button} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Button,
+  TouchableOpacity,
+} from 'react-native';
 import Context from '../../Context';
 import {homeScreenValues} from '../../consts/consts';
 
@@ -38,14 +45,19 @@ const AddForm: React.FC<addFormProps> = ({type = 'column', setScreenValue}) => {
         <TextInput
           value={columnName}
           onChangeText={setColumnName}
-          // disabled={type === 'card'}
+          style={styles.textInput}
+          editable={type !== 'card'}
         />
       </View>
       {type === 'card' ? (
         <>
           <View style={styles.inputView}>
             <Text style={styles.addColumnLabel}>Card name</Text>
-            <TextInput value={cardName} onChangeText={setCardname} />
+            <TextInput
+              value={cardName}
+              onChangeText={setCardname}
+              style={styles.textInput}
+            />
           </View>
           <View style={styles.inputView}>
             <Text style={styles.addColumnLabel}>Text</Text>
@@ -54,13 +66,16 @@ const AddForm: React.FC<addFormProps> = ({type = 'column', setScreenValue}) => {
               numberOfLines={6}
               value={textValue}
               onChangeText={setTextValue}
+              style={styles.textInput}
             />
           </View>
         </>
       ) : null}
-      <Button onPress={onAddComplete} style={styles.completeButton}>
-        Ok
-      </Button>
+      <TouchableOpacity onPress={onAddComplete}>
+        <View style={styles.completeButton}>
+          <Text style={styles.buttonText}>Ok</Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -73,14 +88,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   completeButton: {
-    width: 50,
-    height: 30,
-    marginTop: 12,
+    width: 60,
+    height: 40,
+    marginTop: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1976d2',
+    flexDirection: 'column',
+    borderRadius: 6,
+    borderColor: '#fff',
+    borderWidth: 1,
+  },
+  textInput: {
+    borderColor: '#1976d2',
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 8,
+  },
+  buttonText: {
+    color: '#fff',
   },
   addColumnLabel: {
     marginTop: 12,
     fontWeight: '700',
     fontSize: 16,
+    color: '#1976d2',
   },
   inputView: {},
 });
